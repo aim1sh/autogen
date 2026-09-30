@@ -42,13 +42,13 @@ export OAI_CONFIG_LIST=$(cat ./OAI_CONFIG_LIST)
 
 If an OAI_CONFIG_LIST is *not* provided (by means of file or environment variable), AutoGenBench will use the OPENAI_API_KEY environment variable instead.
 
-For some benchmark scenarios, additional keys may be required (e.g., keys for the Bing Search API). These can be added to an `ENV.json` file in the current working folder. An example `ENV.json` file is provided below:
+For some benchmark scenarios, additional keys may be required (e.g., a Bing Search API key). Add them to `ENV.yaml` in the benchmark directory:
 
+```yaml
+BING_API_KEY: xxxyyyzzz
 ```
-{
-    "BING_API_KEY": "xxxyyyzzz"
-}
-```
+
+AutoGenBench reads `ENV.yaml` by default. It also accepts the older `ENV.json` format, but warns that JSON environment files are deprecated. Use `agbench run --env PATH` to load a file at another location.
 
 ## A Typical Session
 
@@ -64,26 +64,21 @@ cd autogen/python/packages/agbench/benchmarks/HumanEval
 **Note:** The following instructions are specific to the HumanEval benchmark. For other benchmarks, please refer to the README in the respective benchmark folder, e.g.,: [AssistantBench](benchmarks/AssistantBench/README.md).
 
 
-Create a file called ENV.json with the following (required) contents (If you're using MagenticOne), if using Azure:
+Create `ENV.yaml` in the HumanEval directory to choose the Magentic-One model provider. For Azure OpenAI:
 
-```json
-{
-    "CHAT_COMPLETION_KWARGS_JSON": "{}",
-    "CHAT_COMPLETION_PROVIDER": "azure"
-}
+```yaml
+CHAT_COMPLETION_PROVIDER: azure
+CHAT_COMPLETION_KWARGS_JSON: '{}'
 ```
 
-You can also use the openai client by replacing the last two entries in the ENV file by:
+If you use Azure identity instead of an `AZURE_OPENAI_AD_TOKEN` environment variable, run `agbench run --azure ...` to pass a bearer token to the task. For the OpenAI client, use:
 
-- `CHAT_COMPLETION_PROVIDER='openai'`
-- `CHAT_COMPLETION_KWARGS_JSON` with the following JSON structure:
-
-```json
-{
-  "api_key": "REPLACE_WITH_YOUR_API",
-  "model": "REPLACE_WITH_YOUR_MODEL"
-}
+```yaml
+CHAT_COMPLETION_PROVIDER: openai
+CHAT_COMPLETION_KWARGS_JSON: '{"api_key": "${OPENAI_API_KEY}", "model": "gpt-4o-mini"}'
 ```
+
+`CHAT_COMPLETION_KWARGS_JSON` is a **string containing JSON**; quote it as shown. AutoGenBench substitutes `${OPENAI_API_KEY}` from your environment before passing the value into the scenario.
 
 Now initialize the tasks.
 
